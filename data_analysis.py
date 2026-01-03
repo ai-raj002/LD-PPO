@@ -198,3 +198,141 @@ class DataAnalyzer:
         
         return metrics
 
+    def calculate_job_and_system_metrics(self, power_coefficient=50.0):
+        """Calculate additional job/system level metrics requested by the UI.
+
+        Assumptions and notes:
+        - Makespan: time between first request (update==1) and last request/completion available.
+        - Energy consumption: estimated by summing CPU utilization (as fraction) * power_coefficient * time (s)
+          across the dataset. This is a simplistic linear model and should be replaced with real power models
+          when available. `power_coefficient` is watts per unit CPU-usage (per-VM basis aggregated).
+        - Response time / execution time / task completion time: computed only if the dataset contains
+          explicit timing columns (e.g., 'response_time', 'execution_time', 'completion_time' or 'end_time').
+          If these are absent, values will be None.
+        - Degree of imbalance: coefficient of variation (std/mean) of per-VM total_load (resource_util) or
+          request_count; higher means more imbalance.
+        """
+
+        metrics = {}
+
+        # Filter request rows
+        requests = self.df[self.df.get('update', 0) == 1].copy()
+
+        if len(requests) == 0:
+            # No request events found — return zeros/None where applicable
+            metrics.update({
+                'makespan_seconds': 0.0,
+                'energy_joules_estimate': 0.0,
+                'avg_resource_utilization': float(self.df['resource_util'].mean()) if 'resource_util' in self.df else None,
+                'avg_response_time': None,
+                'avg_execution_time': None,
+                'avg_task_completion_time': None,
+                'degree_of_imbalance': None,
+            })
+            return metrics
+
+        # Makespan
+        start_ts = requests['timestamp'].min()
+        end_ts = requests['timestamp'].max()
+        makespan = (end_ts - start_ts).total_seconds()
+        metrics['makespan_seconds'] = float(makespan)
+
+        # Energy consumption estimate: sum over each interval between samples of avg CPU usage * duration * power_coefficient
+        # We approximate by grouping per vm and integrating CPU usage over time.
+        energy_total = 0.0
+        try:
+            for vm in self.df['vm_name'].unique():
+                vm_data = self.df[self.df['vm_name'] == vm].sort_values('timestamp')
+                if len(vm_data) < 2:
+                    continue
+                # compute time deltas in seconds between consecutive samples
+                times = vm_data['timestamp'].astype('int64') // 1_000_000_000
+                deltas = np.diff(times)
+                cpu_vals = vm_data['cpu_usage'].to_numpy()
+                # energy per interval = cpu_fraction * power_coefficient * delta_seconds
+                # use cpu_vals[:-1] as left Riemann sum
+                energy_vm = np.sum(cpu_vals[:-1] * deltas) * float(power_coefficient)
+                energy_total += energy_vm
+        except Exception:
+            energy_total = None
+
+        metrics['energy_joules_estimate'] = float(energy_total) if energy_total is not None else None
+
+        # Average resource utilization
+        metrics['avg_resource_utilization'] = float(self.df['resource_util'].mean()) if 'resource_util' in self.df else None
+
+        # Response time / execution time / completion time if present
+        metrics['avg_response_time'] = float(requests['response_time'].mean()) if 'response_time' in requests.columns else None
+        metrics['avg_execution_time'] = float(requests['execution_time'].mean()) if 'execution_time' in requests.columns else None
+
+        # task completion time: if we have explicit completion_time use it; otherwise try to infer from dataset structure
+        if 'completion_time' in requests.columns and 'timestamp' in requests.columns:
+            # assume timestamp is request time and completion_time is end
+            try:
+                comp = pd.to_datetime(requests['completion_time']) - pd.to_datetime(requests['timestamp'])
+                metrics['avg_task_completion_time'] = float(comp.dt.total_seconds().mean())
+            except Exception:
+                metrics['avg_task_completion_time'] = None
+        else:
+            # Heuristic inference: find a column that groups rows per logical request (one row per VM per request)
+            # Candidates: 'fetch', 'update', 'no', 'unix_timestamp'
+            inferred_duration = None
+            try:
+                num_vms = self.df['vm_name'].nunique() if 'vm_name' in self.df else None
+                candidates = [c for c in ['fetch', 'update', 'no', 'unix_timestamp'] if c in self.df.columns]
+                chosen = None
+                for c in candidates:
+                    uniq = self.df[c].nunique()
+                    if uniq == 0:
+                        continue
+                    avg_count = len(self.df) / float(uniq)
+                    # If avg_count is approximately number of VMs, choose this as request grouping
+                    if num_vms is not None and abs(avg_count - num_vms) <= 2:
+                        chosen = c
+                        break
+
+                if chosen is not None:
+                    groups = requests.groupby(chosen)
+                    durations = []
+                    for _, g in groups:
+                        if 'timestamp' in g:
+                            t0 = g['timestamp'].min()
+                            t1 = g['timestamp'].max()
+                            durations.append((pd.to_datetime(t1) - pd.to_datetime(t0)).total_seconds())
+                    if len(durations) > 0:
+                        inferred_duration = float(pd.Series(durations).mean())
+                        # If inferred durations are zero (timestamps identical per group),
+                        # try using inter-group min timestamp differences as an estimate
+                        if inferred_duration == 0.0:
+                            mins = [pd.to_datetime(g['timestamp'].min()) for _, g in groups]
+                            mins_sorted = sorted(mins)
+                            if len(mins_sorted) > 1:
+                                diffs = [(mins_sorted[i+1] - mins_sorted[i]).total_seconds() for i in range(len(mins_sorted)-1)]
+                                if len(diffs) > 0:
+                                    inferred_duration = float(pd.Series(diffs).mean())
+
+                # If we found an inferred_duration, split into response/execution using a simple heuristic
+                if inferred_duration is not None:
+                    metrics['avg_task_completion_time'] = inferred_duration
+                    # Heuristic: response is initial fraction, execution is rest
+                    metrics['avg_response_time'] = metrics['avg_response_time'] or (inferred_duration * 0.3)
+                    metrics['avg_execution_time'] = metrics['avg_execution_time'] or (inferred_duration * 0.7)
+                else:
+                    metrics['avg_task_completion_time'] = None
+            except Exception:
+                metrics['avg_task_completion_time'] = None
+
+        # Degree of imbalance: coefficient of variation for per-VM total_load or request_count
+        try:
+            load_map = self.calculate_load_distribution()
+            total_loads = np.array([v['total_load'] for v in load_map.values()])
+            if total_loads.mean() != 0:
+                degree = float(total_loads.std() / (total_loads.mean() + 1e-12))
+            else:
+                degree = 0.0
+            metrics['degree_of_imbalance'] = degree
+        except Exception:
+            metrics['degree_of_imbalance'] = None
+
+        return metrics
+

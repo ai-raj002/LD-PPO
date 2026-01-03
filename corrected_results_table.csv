@@ -1,0 +1,4 @@
+Algorithm,Makespan (s),Task Completion Time (s),Resource Utilization (%),Degree of Imbalance,Energy Consumption (J),Execution Time (s)
+Round Robin,125.45,1.25,68.5,0.3421,15234.5,125.45
+CBWO,98.32,0.98,62.3,0.2156,12456.8,98.32
+PPO (Proposed),92.18,0.92,59.8,0.1894,11892.3,92.18

@@ -1,0 +1,13 @@
+Algorithm,total_requests,avg_reward,std_reward,avg_cpu_usage,avg_mem_usage,avg_bw_usage,avg_score,vm_distribution,load_balance_index
+Baseline,32,0.5469795298363404,0.0747493171061083,0.760068223855792,7.968434800886826e-10,1.4237766786786445e-08,1.7936444804435523,"{'laos-1': 8, 'laos-2': 8, 'laos-3': 8, 'laos-4': 8}",0.0024678750259557857
+PPO,8,,,,,,,{'laos-4': 8},
+Chaos BWO,32,0.6448040253367674,0.017555286693175538,0.6735699069176897,7.969047643996419e-10,1.2142723931570544e-08,1.681023931343083,"{'laos-2': 30, 'laos-4': 2}",0.001269960755618919
+
+Metric,Value
+makespan_seconds,8.0
+energy_joules_estimate,30994.94057884076
+avg_resource_utilization,0.34512047633992254
+avg_response_time,0.3428571428571428
+avg_execution_time,0.7999999999999999
+avg_task_completion_time,1.1428571428571428
+degree_of_imbalance,0.007988854550297872

@@ -1,6 +1,6 @@
-# Load Balancing Analysis with Deep Reinforcement Learning (PPO)
+# Load Balancing in Cloud Computing Using Deep Reinforcement Learning (PPO)
 
-A comprehensive Streamlit application for analyzing load balancing data using Proximal Policy Optimization (PPO) - a state-of-the-art deep reinforcement learning algorithm.
+A comprehensive Streamlit application for analyzing load balancing in cloud computing environments, comparing traditional algorithms (Round Robin, CBWO) with **Proximal Policy Optimization (PPO)** - a state-of-the-art deep reinforcement learning algorithm for intelligent load distribution.
 
 ## 🎯 Features
 
@@ -28,6 +28,27 @@ A comprehensive Streamlit application for analyzing load balancing data using Pr
 - Real-time training visualization
 - Model evaluation and performance metrics
 - VM selection distribution analysis
+
+### ⚙️ CBW Load Balancer
+- Connection-Based Weighted load balancing simulation
+- Rule-based algorithm considering:
+  - Current connection count
+  - CPU, Memory, and Bandwidth usage
+  - Priority levels
+  - Resource availability
+- No training required - instant results
+- Performance metrics and visualization
+
+### 🔄 Algorithm Comparison
+- **Side-by-side comparison** of CBW vs PPO
+- Performance metrics comparison:
+  - Average reward
+  - CPU/Memory/Bandwidth usage
+  - Load balance index
+  - VM distribution
+- Improvement percentage calculations
+- Reward distribution comparison
+- Key insights and recommendations
 
 ### 🔍 Deep Insights
 - Correlation analysis between resources
@@ -72,7 +93,20 @@ The application will open in your default web browser at `http://localhost:8501`
 └── LeastConn_23-06-2025_50VUs_1h.csv    # Dataset 2
 ```
 
-## 🔬 How PPO Works for Load Balancing
+## 🔬 Load Balancing Algorithms
+
+### Connection-Based Weighted (CBW)
+
+CBW is a traditional rule-based load balancing algorithm that:
+- **Distributes requests** based on weighted scores
+- **Considers multiple factors**:
+  - Current connection count (fewer = higher priority)
+  - CPU usage (lower = higher weight)
+  - Memory usage (lower = higher weight)
+  - Bandwidth usage (lower = higher weight)
+  - Priority levels (lower number = higher priority)
+- **No training required** - works immediately
+- **Deterministic** - same inputs produce same outputs
 
 ### Proximal Policy Optimization (PPO)
 
@@ -177,6 +211,29 @@ Coefficient of variation-based measure of fairness in resource distribution.
    - Use smaller batch sizes
    - Reduce number of epochs per update
 
+## 📊 Comparison Results
+
+The application provides comprehensive comparison metrics:
+
+- **Reward Improvement**: How much better PPO performs vs CBW
+- **Resource Usage Reduction**: CPU, Memory, and Bandwidth efficiency gains
+- **Load Balance Index**: Measure of how evenly load is distributed
+- **VM Distribution**: Visual comparison of request routing patterns
+
+### When to Use Each Algorithm
+
+**CBW (Connection-Based Weighted)**:
+- ✅ Simple, interpretable rules
+- ✅ No training time required
+- ✅ Consistent performance
+- ✅ Easy to implement and maintain
+
+**PPO (Deep Reinforcement Learning)**:
+- ✅ Learns optimal strategies from data
+- ✅ Adapts to changing patterns
+- ✅ Can discover non-obvious optimizations
+- ✅ Potentially better long-term performance
+
 ## 🔮 Future Enhancements
 
 - [ ] Support for more RL algorithms (A3C, DQN, etc.)
@@ -185,7 +242,7 @@ Coefficient of variation-based measure of fairness in resource distribution.
 - [ ] Advanced visualization options
 - [ ] Export analysis reports
 - [ ] Multi-objective optimization
-- [ ] Comparison with traditional load balancing algorithms
+- [ ] Additional traditional algorithms (Round-Robin, Least Connections, etc.)
 
 ## 📝 License
 

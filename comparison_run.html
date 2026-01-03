@@ -1,0 +1,82 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Load Balancing Algorithm Comparison Report</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            h1 { color: #1f77b4; text-align: center; }
+            h2 { color: #333; border-bottom: 2px solid #1f77b4; padding-bottom: 5px; }
+            table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+            th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+            th { background-color: #1f77b4; color: white; }
+            tr:nth-child(even) { background-color: #f2f2f2; }
+            .metric { margin: 10px 0; }
+            .summary { background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        </style>
+    </head>
+    <body>
+        <h1>Load Balancing Algorithm Comparison Report</h1>
+        <p style="text-align: center; color: #666;">Generated on: 2025-12-11 13:28:21</p>
+        
+        <div class="summary">
+            <h2>Executive Summary</h2>
+    
+            <p><strong>PPO Performance:</strong> +0.00% reward improvement</p>
+            <p><strong>CPU Usage Reduction:</strong> +0.00%</p>
+            <p><strong>Memory Usage Reduction:</strong> +0.00%</p>
+            <p><strong>Bandwidth Usage Reduction:</strong> +0.00%</p>
+        
+        </div>
+        
+        <h2>Performance Metrics Comparison</h2>
+        <table>
+            <tr>
+                <th>Metric</th>
+    <th>total_requests</th><th>avg_reward</th><th>std_reward</th><th>avg_cpu_usage</th><th>avg_mem_usage</th><th>avg_bw_usage</th><th>avg_score</th><th>vm_distribution</th><th>load_balance_index</th></tr><tr><td><strong>Baseline</strong></td><td>32.0000</td><td>0.5470</td><td>0.0747</td><td>0.7601</td><td>0.0000</td><td>0.0000</td><td>1.7936</td><td>{'laos-1': 8, 'laos-2': 8, 'laos-3': 8, 'laos-4': 8}</td><td>0.0025</td></tr><tr><td><strong>PPO</strong></td><td>8.0000</td><td>nan</td><td>nan</td><td>nan</td><td>nan</td><td>nan</td><td>None</td><td>{'laos-2': 8}</td><td>nan</td></tr><tr><td><strong>Chaos BWO</strong></td><td>32.0000</td><td>0.6448</td><td>0.0176</td><td>0.6736</td><td>0.0000</td><td>0.0000</td><td>1.6810</td><td>{'laos-2': 30, 'laos-4': 2}</td><td>0.0013</td></tr>
+        </table>
+        
+        <h2>Dataset-level Metrics (selected window)</h2>
+        <table>
+<tr><td><strong>makespan_seconds</strong></td><td>8.0</td></tr><tr><td><strong>energy_joules_estimate</strong></td><td>30994.94057884076</td></tr><tr><td><strong>avg_resource_utilization</strong></td><td>0.34512047633992254</td></tr><tr><td><strong>avg_response_time</strong></td><td>0.3428571428571428</td></tr><tr><td><strong>avg_execution_time</strong></td><td>0.7999999999999999</td></tr><tr><td><strong>avg_task_completion_time</strong></td><td>1.1428571428571428</td></tr><tr><td><strong>degree_of_imbalance</strong></td><td>0.007988854550297872</td></tr></table>
+        <h2>Algorithm Details</h2>
+    
+        <div class="metric">
+            <h3>Baseline Algorithm</h3>
+            <ul>
+                <li>Total Requests: 32</li>
+                <li>Average Reward: 0.5469795298363404</li>
+                <li>Average CPU Usage: 0.760068223855792</li>
+                <li>Average Memory Usage: 7.968434800886826e-10</li>
+                <li>Average Bandwidth Usage: 1.4237766786786445e-08</li>
+                <li>Load Balance Index: 0.0024678750259557857</li>
+            </ul>
+        </div>
+        
+        <div class="metric">
+            <h3>PPO Algorithm</h3>
+            <ul>
+                <li>Total Requests: 8</li>
+                <li>Average Reward: N/A</li>
+                <li>Average CPU Usage: N/A</li>
+                <li>Average Memory Usage: N/A</li>
+                <li>Average Bandwidth Usage: N/A</li>
+                <li>Load Balance Index: N/A</li>
+            </ul>
+        </div>
+        
+        <div class="metric">
+            <h3>Chaos BWO Algorithm</h3>
+            <ul>
+                <li>Total Requests: 32</li>
+                <li>Average Reward: 0.6448040253367674</li>
+                <li>Average CPU Usage: 0.6735699069176897</li>
+                <li>Average Memory Usage: 7.969047643996419e-10</li>
+                <li>Average Bandwidth Usage: 1.2142723931570544e-08</li>
+                <li>Load Balance Index: 0.001269960755618919</li>
+            </ul>
+        </div>
+        
+    </body>
+    </html>
+    
